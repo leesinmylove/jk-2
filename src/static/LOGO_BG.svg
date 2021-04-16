@@ -1,0 +1,127 @@
+<svg id="LOGO_BG" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1311" height="106" viewBox="0 0 1311 106">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #0082ff;
+        fill-opacity: 0.1;
+        filter: url(#filter);
+      }
+
+      .cls-1, .cls-10, .cls-11 {
+        stroke: #06f3ff;
+        stroke-width: 1px;
+      }
+
+      .cls-1, .cls-10, .cls-11, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9 {
+        fill: #0093f6;
+      }
+
+      .cls-2 {
+        opacity: 0.9;
+      }
+
+      .cls-3 {
+        opacity: 0.8;
+      }
+
+      .cls-4 {
+        opacity: 0.7;
+      }
+
+      .cls-5 {
+        opacity: 0.6;
+      }
+
+      .cls-6 {
+        opacity: 0.5;
+      }
+
+      .cls-7 {
+        opacity: 0.4;
+      }
+
+      .cls-8 {
+        opacity: 0.3;
+      }
+
+      .cls-10, .cls-11 {
+        fill-opacity: 0;
+      }
+
+      .cls-10 {
+        fill: url(#linear-gradient);
+        filter: url(#filter-2);
+      }
+
+      .cls-11 {
+        fill: url(#linear-gradient-2);
+        filter: url(#filter-3);
+      }
+    </style>
+    <filter id="filter" x="62" y="0" width="1189" height="106" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" stdDeviation="4.472" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#0082ff" flood-opacity="0.3"/>
+      <feComposite result="composite" operator="out" in2="blur"/>
+      <feOffset result="offset" dy="-3"/>
+      <feComposite result="composite-2" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" in2="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient" x1="73.688" y1="27.125" x2="73.688" gradientUnits="userSpaceOnUse">
+      <stop offset="0"/>
+      <stop offset="1" stop-color="#de3c46"/>
+    </linearGradient>
+    <filter id="filter-2" x="0" y="0" width="147.375" height="27.125" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" stdDeviation="4.472" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#0092ff" flood-opacity="0.6"/>
+      <feComposite result="composite" operator="out" in2="blur"/>
+      <feOffset result="offset" dy="-3"/>
+      <feComposite result="composite-2" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" in2="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-2" x1="1237.5" y1="27" x2="1237.5" xlink:href="#linear-gradient"/>
+    <filter id="filter-3" x="1164" y="0" width="147" height="27" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" stdDeviation="4.472" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#0092ff" flood-opacity="0.6"/>
+      <feComposite result="composite" operator="out" in2="blur"/>
+      <feOffset result="offset" dy="-3"/>
+      <feComposite result="composite-2" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g style="fill: #0082ff; filter: url(#filter)">
+    <path id="表头点缀3" class="cls-1" d="M62,0L73,12H333l90.053,94h462L979,12h260l12-12H62Z" style="stroke: inherit; filter: none; fill: inherit"/>
+  </g>
+  <use xlink:href="#表头点缀3" style="stroke: #06f3ff; filter: none; fill: none"/>
+  <g id="表头点缀1.1">
+    <path id="矩形_1_拷贝" data-name="矩形 1 拷贝" class="cls-2" d="M295,22h10l26,26H321Z"/>
+    <path id="矩形_1_拷贝_2" data-name="矩形 1 拷贝 2" class="cls-3" d="M278,22h10l21,21H299Z"/>
+    <path id="矩形_1_拷贝_3" data-name="矩形 1 拷贝 3" class="cls-4" d="M262,22h10l17,18H279Z"/>
+    <path id="矩形_1_拷贝_4" data-name="矩形 1 拷贝 4" class="cls-5" d="M245,22h11l13,15H258Z"/>
+    <path id="矩形_1_拷贝_5" data-name="矩形 1 拷贝 5" class="cls-6" d="M229,22h10l12,13H240Z"/>
+    <path id="矩形_1_拷贝_6" data-name="矩形 1 拷贝 6" class="cls-7" d="M211.21,21.814h10.527l12.631,12.514H223.842Z"/>
+    <path id="矩形_1_拷贝_7" data-name="矩形 1 拷贝 7" class="cls-8" d="M194.368,21.814H204.9l11.578,11.471H205.947Z"/>
+    <path id="矩形_1" data-name="矩形 1" class="cls-9" d="M312,22h11l30,31H343Z"/>
+  </g>
+  <g id="表头点缀1.1_拷贝" data-name="表头点缀1.1 拷贝">
+    <path id="矩形_1_拷贝-2" data-name="矩形 1 拷贝" class="cls-2" d="M1016.37,22h-10l-26,26h10Z"/>
+    <path id="矩形_1_拷贝_2-2" data-name="矩形 1 拷贝 2" class="cls-3" d="M1033.37,22h-9.99l-21.01,21h10Z"/>
+    <path id="矩形_1_拷贝_3-2" data-name="矩形 1 拷贝 3" class="cls-4" d="M1049.37,22h-10l-17,18h10Z"/>
+    <path id="矩形_1_拷贝_4-2" data-name="矩形 1 拷贝 4" class="cls-5" d="M1066.37,22h-11l-13,15h11.01Z"/>
+    <path id="矩形_1_拷贝_5-2" data-name="矩形 1 拷贝 5" class="cls-6" d="M1082.37,22h-10l-12,13h11Z"/>
+    <path id="矩形_1_拷贝_6-2" data-name="矩形 1 拷贝 6" class="cls-7" d="M1100.16,21.814h-10.52l-12.63,12.514h10.52Z"/>
+    <path id="矩形_1_拷贝_7-2" data-name="矩形 1 拷贝 7" class="cls-8" d="M1117.01,21.814h-10.53L1094.9,33.286h10.53Z"/>
+    <path id="矩形_1-2" data-name="矩形 1" class="cls-9" d="M999.375,22h-11l-30,31h10Z"/>
+  </g>
+  <g style="fill: url(#linear-gradient); filter: url(#filter-2)">
+    <path id="表头点缀2" class="cls-10" d="M0,0L27.368,27.114h120L137.9,18.771H67.368L51.579,0H0Z" style="stroke: inherit; filter: none; fill: inherit"/>
+  </g>
+  <use xlink:href="#表头点缀2" style="stroke: #06f3ff; filter: none; fill: none"/>
+  <g style="fill: url(#linear-gradient-2); filter: url(#filter-3)">
+    <path id="表头点缀2_拷贝" data-name="表头点缀2 拷贝" class="cls-11" d="M1311,0l-27.3,26.989H1164.01l9.45-8.3h70.34L1259.55,0H1311Z" style="stroke: inherit; filter: none; fill: inherit"/>
+  </g>
+  <use xlink:href="#表头点缀2_拷贝" style="stroke: #06f3ff; filter: none; fill: none"/>
+</svg>

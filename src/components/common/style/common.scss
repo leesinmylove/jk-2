@@ -1,0 +1,55 @@
+@mixin scroll($bg: #f6f6f6, $thumb: #999, $btn: #999, $size: 4px) {
+    scrollbar-3dlight-color: $bg;
+    scrollbar-highlight-color: $bg;
+    scrollbar-face-color: $thumb;
+    scrollbar-arrow-color: $btn;
+    scrollbar-shadow-color: $thumb;
+    scrollbar-dark-shadow-color: $thumb;
+    scrollbar-base-color: $bg;
+    scrollbar-track-color: $bg;
+    overflow: auto;
+
+    &::-webkit-scrollbar {
+      width: $size;
+      height: $size;
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-button {
+      background-color: $btn;
+      display: none;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: $bg;
+    }
+
+    &::-webkit-scrollbar-track-piece {
+      background: $bg;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $thumb;
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: $bg;
+    }
+
+    &::-webkit-resizer {
+      background: $bg;
+    }
+  }
+
+  ul li {
+    list-style: none;
+  }
+
+  input {
+
+    border: 0;  // 去除未选中状态边框
+    outline: none; // 去除选中状态边框
+    background-color: rgba(0, 0, 0, 0);// 透明背景
+
+  }
