@@ -11,6 +11,26 @@
           <div class="right" @click="search">搜索</div>
           <div class="outRight">SpqrQl检索</div>
       </div>
+      <div class="selectKgName">
+        <el-select v-model="kgName" filterable placeholder="请选择图谱名称">
+          <el-option
+            v-for="item in kgNameArr"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
+      <div class="selectMap">
+        <el-select v-model="mapName" filterable placeholder="请选择图谱名称">
+          <el-option
+            v-for="item in mapArr"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
       <div class="contentList">
         <ul class="listBg">
           <li v-for="(item,index) in contentListData" :key="index">
@@ -66,17 +86,59 @@ export default {
       indx1: -1,
       listData:[],
       key: '',
-      contentListData:[]
+      contentListData:[],
+      kgName: '',
+      kgNameArr: [
+        {
+          label:'驾驶舱应用',
+          value:'kgms_default_user_graph_176e0853be8'
+        },
+        {
+          label:'驾驶舱应用20210412',
+          value:'kgms_default_user_graph_178c4a3c1c5'
+        },
+        {
+          label:'驾驶舱应用20210330',
+          value:'kgms_default_user_graph_1788235d80b'
+        },
+      ],
+      mapName: '经典',
+      mapArr: [
+        {
+          label:'蓝色',
+          value:'blue'
+        },
+        {
+          label:'绿色',
+          value:'green'
+        },
+        {
+          label:'经典',
+          value:'das'
+        },
+      ],
     };
   },
   created() {
   },
+  watch: {
+    kgName: {
+      handler(newVal, oldVal){
+        console.log(newVal);
+        window.kgName = newVal;
+        this.getconceptList();
+      },
+      deep: true
+    }
+  },
   mounted() {
     console.log(window,this.window);
+    this.kgName = this.window.kgName;
     this.listData.push(window.settingData.listData[0][0])
     this.listData.push(...window.settingData.listData[1])
     console.log(this.listData);
-    this.getconcept();
+    this.getconceptList();
+    // this.getKgNameArr()
     // console.log(window,'window')
   },
   methods: {
@@ -121,6 +183,48 @@ export default {
             }
             this.getEntityNum(res.data.data[i],i)
           }
+        }
+      })
+    },
+    getconceptList(){
+      this.$http({
+        method: 'post',
+        url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/graph/stat/entity/count/group/by/concept`,
+        headers: {
+          APK: '445a793dd0314abd875b7980d7ffbbd6',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data:  qs.stringify({p:'api',kgName:this.window.kgName})
+      }).then((res) => {
+        console.log(res.data);
+        if (res.data.data) {
+          console.log(res.data);
+          this.contentListData = [];
+          for(let i in res.data.data.series[0].data){
+            if(i == 5){
+              break;
+            }
+            this.contentListData.push({
+              name: res.data.data.series[0].data[i],
+              num: res.data.data.xaxis[0].data[i]
+            })
+          }
+        }
+      })
+    },
+    getKgNameArr(){
+      this.$http({
+        method: 'POST',
+        url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/app/get/kgname?p=api`,
+        headers: {
+          APK: '445a793dd0314abd875b7980d7ffbbd6',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data:  qs.stringify({})
+      }).then((res) => {
+        console.log();
+        if(res.data.data){
+          
         }
       })
     },
@@ -185,6 +289,18 @@ export default {
         color: #00FFF6;
 
       }
+    }
+
+    .selectKgName{
+      position: fixed;
+      top: 40px;
+      left: 40px;
+    }
+
+    .selectMap{
+      position: fixed;
+      top: 80px;
+      left: 40px;
     }
 
     .search{
