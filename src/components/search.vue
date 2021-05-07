@@ -1,5 +1,8 @@
 <template>
   <div id="search">
+      <div class="returnBtn" v-if="contentType == 'search'" @click="returnList()">
+        返回
+      </div>
       <div class="top" v-if="contentType == 'search'">
         <div class="left" @click="returnList()">
           返回
@@ -36,13 +39,13 @@
                   <img :src="event.url" alt="">
                   <div class="rightContent">
                     <h4 class="overflowPoint">{{event.name}}</h4>
-                    <span>{{event.desc}}</span>
+                    <span class="overflowMorePoint">{{event.desc}}</span>
                     <div class="bottom">
                       <ul class="bottomLeft">
                         <li v-for="(item,indext) in event.other" :key="indext">{{item}}</li>
                       </ul>
                       <div class="position overflowPoint" :title="event.position">{{event.position}}</div>
-                      <div class="time">{{event.date}}</div>
+                      <div class="time">{{event.date.substr(0,10)}}</div>
                     </div>
                   </div>
                 </li>
@@ -76,12 +79,13 @@
           <div class="detailContent">
             <h4 class="overflowPoint">{{event.name}}</h4>
             <div class="timePos">
-              <span>时间：{{event.date}}</span>
+              <span>时间：{{event.date.substr(0,10)}}</span>
               <span>地点：{{event.position}}</span>
             </div>
             <div class="contenStyle">
               <div class="title" v-if="detailNavIndex==0">简介：</div>
-              <span>{{event.desc}}</span>
+              <span v-if="detailNavIndex==0">{{event.desc}}</span>
+              <span v-if="detailNavIndex==1">{{event.originalText?event.originalText:event.desc}}</span>
             </div>
             <div class="contenStyle">
               <div class="title" v-if="detailNavIndex==0">起因：</div>
@@ -231,7 +235,10 @@ export default {
       console.log(page)
     },
     setEntity(item){
-      this.entity = item;
+      console.log(item);
+      this.key = item.name;
+      this.search();
+      // this.entity = item;
     },
     clickEvent(event){
       this.event = event;
@@ -285,8 +292,12 @@ export default {
         data: data
       }).then((res) => {
         if (res.data.errCode === 200) {
+          this.releventEventList = [];
           for(let i in res.data.data.rsData){
-            this.releventEventList.push(res.data.data.rsData[i].sourceAsMap);
+            this.releventEventList.push({
+              id: res.data.data.rsData[i].id,
+              ...res.data.data.rsData[i].sourceAsMap
+            });
           }
           this.getEventDetail(this.releventEventList[0]);
         }
@@ -303,8 +314,8 @@ export default {
         },
         data: qs.stringify({'conceptId': event.classId})
       }).then((res) => {
-        if(res.data.data){
-            this.eventList = [];
+        this.eventList = [];
+        if(res.data.data && res.data.data.length){
             for(let i in res.data.data){
               let event = {
                 id: res.data.data[i].id,
@@ -313,10 +324,11 @@ export default {
                 classId: res.data.data[i].conceptId,
                 date: res.data.data[i].attributes[17],
                 position: res.data.data[i].attributes[1],
-                desc: res.data.data[i].abs,
+                desc: res.data.data[i].abs?res.data.data[i].abs:res.data.data[i].attributes[82],
                 cause: res.data.data[i].attributes[23],
                 after: res.data.data[i].attributes[27],
                 result: res.data.data[i].attributes[28],
+                originalText: res.data.data[i].attributes[69]
               };
               this.eventList.push(event);
             }
@@ -355,6 +367,9 @@ export default {
               event.position = res.data.data.self.extra[i].v;
             }
             if(res.data.data.self.extra[i].k == '简介'){
+              event.desc = res.data.data.self.extra[i].v;
+            }
+            if(!event.desc && res.data.data.self.extra[i].k == '译文'){
               event.desc = res.data.data.self.extra[i].v;
             }
             if(res.data.data.self.extra[i].k == '事件起因'){
@@ -420,6 +435,20 @@ export default {
   height: 100%;
   background: radial-gradient(circle, #084550, #021829);
   padding: 20px;
+  .returnBtn{
+      text-align: center;
+      line-height: 48px;
+      float: left;
+      color: #06F3FF;
+      border-radius: 8px;
+      padding: 0 20px;
+      width: 120px;
+      border: 1px solid #06F3FF;
+      cursor: pointer;
+      position: fixed;
+      top: 20px;
+      left: 40px;
+  }
   .top{
     height: 62px;
     padding: 0 20px;
@@ -678,6 +707,7 @@ export default {
         border: 1px solid #00FFF6;
         margin-top: 20px;
         padding-right: 4px;
+        background: rgba(3,34,50,0.95);
         .enentList{
           width: 100%;
           height: calc(100% - 32px - 16px);
@@ -714,9 +744,18 @@ export default {
                 color: #06F3FF;
               }
               span{
-                height: 180px;
+                height: 178px;
                 display: flex;
                 color: #fff;
+                line-height: 22px;
+              }
+              .overflowMorePoint{
+                overflow:hidden; 
+                text-overflow:ellipsis;  
+                // width:200px; //指定宽度
+                display:-webkit-box;  
+                -webkit-box-orient:vertical;  
+                -webkit-line-clamp:8; //指定显示多少行
               }
               .bottom{
                 height: 32px;
@@ -835,6 +874,7 @@ export default {
         height: calc(100% - 250px);
         max-height: 500px;
         border: 1px solid #00FFF6;
+        background: rgba(3,34,50,0.95);
         .imgSearchPd{
           width: 100%;
           height: 100%;

@@ -113,7 +113,7 @@
                       <span class="tp">地点: </span><span>{{ currentDetailCont['gis地址'] || '无' }}</span>
                     </div>
                     <p>
-                      <span class="tp">简介: </span> <span>{{ currentDetailCont['简介'] || '无' }}</span>
+                      <span class="tp">简介: </span> <span>{{ currentDetailCont['译文'] || '无' }}</span>
                     </p>
                     <p>
                       <span class="tp">起因: </span> <span>{{ currentDetailCont['事件起因'] || '无' }}</span>
@@ -176,7 +176,7 @@
       <div class="t-pop-cont">
         <div class="scroll-pop">
           <ul>
-            <li v-for="(item, indx) in curTimeData.name" :key="indx">
+            <li v-for="(item, indx) in curTimeData.name" :key="indx" @click="handleClickDetali({id:curTimeData.ids[indx]})">
               <span>{{ indx + 1 }}. {{ item }}</span>
             </li>
           </ul>
@@ -627,7 +627,7 @@ export default {
     },
     transCard(data) {
       console.log(data, 'data')
-      let obj = ['时间', 'gis地址', '简介', '事件起因', '事件经过', '事件结果、影响、损失等']
+      let obj = ['时间', 'gis地址', '简介', '事件起因', '事件经过', '事件结果、影响、损失等','译文']
       let cont = {}
       for (let j = 0; j < data.length; j++) {
         for (let i = 0; i < obj.length; i++) {
@@ -844,6 +844,7 @@ export default {
         let move = index * 220 - 521 - 180;
         $('.cockpit-time-axis-cont').scrollLeft(move);
       }
+      console.log(this.curTimeData)
     },
     handleClickArrow(step) {
       const length = this.images.length - 3;
@@ -911,6 +912,7 @@ export default {
               item.sourceAsMap.activate = index == 0 ? true : false
               item.sourceAsMap.index_ = index
             })
+            console.log(_this.searchData,'searchData')
             _this.getIds(_this.searchData)
           }
         }
@@ -923,6 +925,7 @@ export default {
         return item
       })
       this.timeLine(ids, true)
+      this.handleClickList(data[0].sourceAsMap);
     },
     allLatLongTrans(data) {
       console.log(data, '显示全部')
@@ -1079,6 +1082,9 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
   @include scroll($bg: rgba(0, 130, 255, 0.2), $thumb: #0082ff, $btn: #999, $size: 8px);
+  li{
+    cursor: pointer;
+  }
 }
 
 .scroll-content {

@@ -9,7 +9,7 @@
       <div class="search">
           <input type="text" v-model="key" placeholder="请输入搜索内容">
           <div class="right" @click="search">搜索</div>
-          <div class="outRight">SpqrQl检索</div>
+          <div class="outRight" @click="handleClickSpqrQl()">SpqrQl检索</div>
       </div>
       <div class="selectKgName">
         <el-select v-model="kgName" filterable placeholder="请选择图谱名称">
@@ -87,7 +87,7 @@ export default {
       listData:[],
       key: '',
       contentListData:[],
-      kgName: '',
+      kgName: 'kgms_default_user_graph_178c4ad60df',
       kgNameArr: [
         {
           label:'驾驶舱应用',
@@ -98,8 +98,8 @@ export default {
           value:'kgms_default_user_graph_178c4a3c1c5'
         },
         {
-          label:'驾驶舱应用20210330',
-          value:'kgms_default_user_graph_1788235d80b'
+          label:'驾驶舱应用new',
+          value:'kgms_default_user_graph_178c4ad60df'
         },
       ],
       mapName: '经典',
@@ -161,6 +161,9 @@ export default {
         }
 
 
+    },
+    handleClickSpqrQl(){
+      window.open(window.URL_MAP.YYJS)
     },
     handleClickKfpt() {
       window.open(window.URL_MAP.KFPT)

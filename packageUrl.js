@@ -18,7 +18,7 @@ window.URL_MAP = {
 
 };
 
-window.kgName = 'kgms_default_user_graph_176e0853be8';
+window.kgName = 'kgms_default_user_graph_178c4ad60df';
 
 window.settingData = {
   listData: [
