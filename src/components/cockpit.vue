@@ -1,7 +1,17 @@
 <template>
   <div class="cockpit-warapper">
+    <div class="selectMap">
+        <el-select v-model="mapName" filterable placeholder="请选择图谱名称">
+          <el-option
+            v-for="item in mapArr"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
     <div ref="map" class="XSDFXPage">
-      <gisMap @showCard="showCard" :mapZoom="mapZoom" v-if="mapContent.sign.length>0"
+      <gisMap @showCard="showCard" :mapZoom="mapZoom" v-if="mapContent.sign.length>0 && showMap"
               :mapContent="mapContent"></gisMap>
     </div>
     <!--  图谱放大弹框  -->
@@ -243,6 +253,18 @@ export default {
       timePop: false,
       curTimeData: '',
       window: window,
+      showMap: false,
+      mapName: 'arcgis/{z}/{y}/{x}.png',
+      mapArr: [
+        {
+          label:'arcgis',
+          value:'arcgis/{z}/{y}/{x}.png'
+        },
+        {
+          label:'google',
+          value:'google/{z}/{x}/{-y}.png'
+        },
+      ],
       mapContent: {
         sign: [],
         name: [],
@@ -408,7 +430,8 @@ export default {
     }
   },
   mounted() {
-
+    window.localStorage.mapName = window.localStorage.mapName?window.localStorage.mapName:'arcgis/{z}/{y}/{x}.png';
+    this.showMap = true;
     if (this.$route.params) {
       this.isbackHome = this.$route.params.isbackHome
     }
@@ -427,6 +450,19 @@ export default {
   },
   created() {
 
+  },
+  watch: {
+    mapName: {
+      handler(newVal, oldVal){
+        console.log(newVal);
+        this.showMap = false;
+        window.localStorage.mapName = newVal;
+        setTimeout(() => {
+          this.showMap = true;
+        });
+      },
+      deep: true
+    }
   },
   methods: {
     getScroll(event){
@@ -1075,6 +1111,13 @@ export default {
   height: 100%;
   //background: #0b153a;
   background: rgba(0,0,0,0);
+}
+
+.selectMap{
+      position: fixed;
+      top: 12px;
+      left: 70px;
+      z-index: 1;
 }
 
 .scroll-pop {

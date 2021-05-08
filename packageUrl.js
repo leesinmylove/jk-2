@@ -18,8 +18,6 @@ window.URL_MAP = {
 
 };
 
-window.kgName = 'kgms_default_user_graph_178c4ad60df';
-
 window.settingData = {
   listData: [
     [
@@ -32,6 +30,13 @@ window.settingData = {
       },
       {
         title: "语义检索",
+        image: `${window.configure.baseUrl}/pic/yyjs.png`,
+        span: 10,
+        defaultBackBg: true,
+        href: `${window.configure.baseUrl}/kgms/kg/project/main/storage/dataSearch?username=default_user`,
+      },
+      {
+        title: "路径查找",
         image: `${window.configure.baseUrl}/pic/yyjs.png`,
         span: 10,
         defaultBackBg: true,

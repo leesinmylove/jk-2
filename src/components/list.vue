@@ -9,22 +9,12 @@
       <div class="search">
           <input type="text" v-model="key" placeholder="请输入搜索内容">
           <div class="right" @click="search">搜索</div>
-          <div class="outRight" @click="handleClickSpqrQl()">SpqrQl检索</div>
+          <div class="outRight" @click="handleClickSpqrQl()">SparQl检索</div>
       </div>
       <div class="selectKgName">
         <el-select v-model="kgName" filterable placeholder="请选择图谱名称">
           <el-option
             v-for="item in kgNameArr"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-      </div>
-      <div class="selectMap">
-        <el-select v-model="mapName" filterable placeholder="请选择图谱名称">
-          <el-option
-            v-for="item in mapArr"
             :key="item.value"
             :label="item.label"
             :value="item.value">
@@ -102,21 +92,6 @@ export default {
           value:'kgms_default_user_graph_178c4ad60df'
         },
       ],
-      mapName: '经典',
-      mapArr: [
-        {
-          label:'蓝色',
-          value:'blue'
-        },
-        {
-          label:'绿色',
-          value:'green'
-        },
-        {
-          label:'经典',
-          value:'das'
-        },
-      ],
     };
   },
   created() {
@@ -126,6 +101,7 @@ export default {
       handler(newVal, oldVal){
         console.log(newVal);
         window.kgName = newVal;
+        window.localStorage.kgName = newVal;
         this.getconceptList();
       },
       deep: true
@@ -133,7 +109,8 @@ export default {
   },
   mounted() {
     console.log(window,this.window);
-    this.kgName = this.window.kgName;
+    this.kgName = window.localStorage.kgName?window.localStorage.kgName:'';
+    this.listData.push(window.settingData.listData[0][2])
     this.listData.push(window.settingData.listData[0][0])
     this.listData.push(...window.settingData.listData[1])
     console.log(this.listData);
@@ -227,7 +204,7 @@ export default {
       }).then((res) => {
         console.log();
         if(res.data.data){
-          
+
         }
       })
     },
@@ -300,14 +277,8 @@ export default {
       left: 40px;
     }
 
-    .selectMap{
-      position: fixed;
-      top: 80px;
-      left: 40px;
-    }
-
     .search{
-      margin: 20px 30%;
+      margin: 140px 30% 80px 30%;
       width: 40%;
       height: 70px;
       background: #043B50;
@@ -363,16 +334,18 @@ export default {
 
     .constent {
       margin-top: 40px;
-      padding: 0 20%;
-      height: 240px;
+      padding: 0 4%;
+      height: 180px;
       .listBg{
         width: 100%;
         height: 100%;
         li{
           height: 100%;
-          width: 22%;
-          margin-right: 4%;
+          width: 15%;
+          margin-right: calc((100% - 15%*5)/4);
           float: left;
+          border: 1px solid #06F3FF;
+          overflow: hidden;
           &:last-child{
             margin-right: 0;
           }
@@ -381,10 +354,9 @@ export default {
 
 
       .bg-purple {
-        height: 240px;
+        height: 180px;
         cursor: pointer;
         position: relative;
-        box-shadow: 0 0 5px #3db8ff;
         overflow: hidden;
 
         .mantle {
@@ -393,6 +365,7 @@ export default {
           font-size: 26px;
           font-weight: 800;
           color: rgba(255, 255, 255, 0.7);
+          box-shadow: 0 0 20px #06F3FF inset;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -436,7 +409,7 @@ export default {
       }
 
       .grid-content {
-        border-radius: 4px;
+        // border-radius: 4px;
         min-height: 36px;
       }
 

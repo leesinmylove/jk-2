@@ -1,6 +1,6 @@
 <template>
   <div id="search">
-      <div class="returnBtn" v-if="contentType == 'search'" @click="returnList()">
+      <div class="returnBtn" v-if="contentType == 'content'" @click="returnList()">
         返回
       </div>
       <div class="top" v-if="contentType == 'search'">
@@ -54,9 +54,9 @@
                 <el-pagination
                   @current-change="handleSizeChange"
                   :page-size="10"
-                  :current-page="1"
+                  :current-page="currentPage"
                   layout="prev, pager, next"
-                  :total="this.totle"
+                  :total="this.total"
                 >
                 </el-pagination>
               </div>
@@ -79,8 +79,8 @@
           <div class="detailContent">
             <h4 class="overflowPoint">{{event.name}}</h4>
             <div class="timePos">
-              <span>时间：{{event.date.substr(0,10)}}</span>
-              <span>地点：{{event.position}}</span>
+              <span v-if="event.date">时间：{{event.date.substr(0,10)}}</span>
+              <span v-if="event.position">地点：{{event.position}}</span>
             </div>
             <div class="contenStyle">
               <div class="title" v-if="detailNavIndex==0">简介：</div>
@@ -88,15 +88,15 @@
               <span v-if="detailNavIndex==1">{{event.originalText?event.originalText:event.desc}}</span>
             </div>
             <div class="contenStyle">
-              <div class="title" v-if="detailNavIndex==0">起因：</div>
+              <div class="title" v-if="detailNavIndex==0 && event.cause">起因：</div>
               <span>{{event.cause}}</span>
             </div>
             <div class="contenStyle">
-              <div class="title" v-if="detailNavIndex==0">经过：</div>
+              <div class="title" v-if="detailNavIndex==0 && event.after">经过：</div>
               <span>{{event.after}}</span>
             </div>
             <div class="contenStyle">
-              <div class="title" v-if="detailNavIndex==0">结果：</div>
+              <div class="title" v-if="detailNavIndex==0 && event.result">结果：</div>
               <span>{{event.result}}</span>
             </div>
           </div>
@@ -138,7 +138,8 @@ export default {
       eventList: [],
       event: {},
       entityList:[],
-      totle: 1000,
+      total: 0,
+      currentPage: 1,
       entity:'',
       contentType:'search',//search content
       eventRelevantImg: [],
@@ -303,38 +304,98 @@ export default {
         }
       })
     },
-    //相关事件
-    getEntityNum(event,index){
+    //批量知识卡片
+    getMoreEvent(){
       this.$http({
-        method: 'POST',
-        url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/graph/data/entity?p=api&kgName=${this.window.kgName}`,
+        method: 'post',
+        url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/app/infobox/more?p=api&kgName=${this.window.kgName}`,
         headers: {
-          APK: '445a793dd0314abd875b7980d7ffbbd6',
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          APK: '445a793dd0314abd875b7980d7ffbbd6'
         },
-        data: qs.stringify({'conceptId': event.classId})
+        data: qs.stringify({ids: this.ids})
       }).then((res) => {
-        this.eventList = [];
-        if(res.data.data && res.data.data.length){
-            for(let i in res.data.data){
+        console.log(res)
+        let relEventList = [];
+        if (res.data.data && res.data.data.length) {
+          for(let j in res.data.data){
               let event = {
-                id: res.data.data[i].id,
-                name:res.data.data[i].name,
-                url: res.data.data[i].imageUrl,
-                classId: res.data.data[i].conceptId,
-                date: res.data.data[i].attributes[17],
-                position: res.data.data[i].attributes[1],
-                desc: res.data.data[i].abs?res.data.data[i].abs:res.data.data[i].attributes[82],
-                cause: res.data.data[i].attributes[23],
-                after: res.data.data[i].attributes[27],
-                result: res.data.data[i].attributes[28],
-                originalText: res.data.data[i].attributes[69]
+                name:res.data.data[j].self.name,
+                url: res.data.data[j].self.img?res.data.data.self.img:'',
+                id: res.data.data[j].self.id,
+                classId: res.data.data[j].self.classId,
+                date:'',
+                position:'',
+                desc:'',
+                cause:'',
+                after:'',
+                result:'',
+                relevant:res.data.data[j].self.multiModals
               };
-              this.eventList.push(event);
+              for(let i in res.data.data[j].self.extra){
+                if(res.data.data[j].self.extra[i].k == '开始时间'){
+                  event.date = res.data.data[j].self.extra[i].v;
+                }
+                if(res.data.data[j].self.extra[i].k == 'gis地址'){
+                  event.position = res.data.data[j].self.extra[i].v;
+                }
+                if(res.data.data[j].self.extra[i].k == '简介'){
+                  event.desc = res.data.data[j].self.extra[i].v;
+                }
+                if(!event.desc && res.data.data[j].self.extra[i].k == '译文'){
+                  event.desc = res.data.data[j].self.extra[i].v.replace('<br/>','');
+                  console.log(res.data.data[j].self.extra[i].v.replace('<br/>',''));
+                }
+                if(res.data.data[j].self.extra[i].k == '事件起因'){
+                  event.cause = res.data.data[j].self.extra[i].v;
+                }
+                if(res.data.data[j].self.extra[i].k == '事件经过'){
+                  event.after = res.data.data[j].self.extra[i].v;
+                }
+                if(res.data.data[j].self.extra[i].k == '事件结果、影响、损失等'){
+                  event.result = res.data.data[j].self.extra[i].v;
+                }
             }
+            relEventList.push(event)
+          }
         }
+
+        this.eventList = relEventList;
+        console.log(this.eventList);
       })
     },
+    //相关事件
+    // getEntityNum(event,index){
+    //   this.$http({
+    //     method: 'POST',
+    //     url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/graph/data/entity?p=api&kgName=${this.window.kgName}`,
+    //     headers: {
+    //       APK: '445a793dd0314abd875b7980d7ffbbd6',
+    //       'Content-Type': 'application/x-www-form-urlencoded'
+    //     },
+    //     data: qs.stringify({'conceptId': event.classId})
+    //   }).then((res) => {
+    //     this.eventList = [];
+    //     if(res.data.data && res.data.data.length){
+    //         for(let i in res.data.data){
+    //           let event = {
+    //             id: res.data.data[i].id,
+    //             name:res.data.data[i].name,
+    //             url: res.data.data[i].imageUrl,
+    //             classId: res.data.data[i].conceptId,
+    //             date: res.data.data[i].attributes[17],
+    //             position: res.data.data[i].attributes[1],
+    //             desc: res.data.data[i].abs?res.data.data[i].abs:res.data.data[i].attributes[82],
+    //             cause: res.data.data[i].attributes[23],
+    //             after: res.data.data[i].attributes[27],
+    //             result: res.data.data[i].attributes[28],
+    //             originalText: res.data.data[i].attributes[69]
+    //           };
+    //           this.eventList.push(event);
+    //         }
+    //     }
+    //   })
+    // },
     getEventDetail(event){
       this.$http({
         method: 'post',
@@ -370,7 +431,8 @@ export default {
               event.desc = res.data.data.self.extra[i].v;
             }
             if(!event.desc && res.data.data.self.extra[i].k == '译文'){
-              event.desc = res.data.data.self.extra[i].v;
+              event.desc = res.data.data.self.extra[i].v.replace('<br/>','');
+              console.log(res.data.data.self.extra[i].v.replace('<br/>',''));
             }
             if(res.data.data.self.extra[i].k == '事件起因'){
               event.cause = res.data.data.self.extra[i].v;
@@ -384,11 +446,27 @@ export default {
           }
           this.event = event;
           // this.eventList.push(this.event);
-          this.getEntityNum(event);
+          // this.getEntityNum(event);
           this.getGraph(event);
           this.getRelevantImg(event);
         }
       })
+    },
+    setIds(){
+      this.ids = [];
+      let idsList = [];
+      for(let i in this.entityList){
+        if(this.entityList[i].conceptId == 5){
+           idsList.push(this.entityList[i].id)
+        }
+      }
+      for(let i in idsList){
+        if(i>=(this.currentPage-1) * 10 && i<=this.currentPage * 10){
+           this.ids.push(idsList[i])
+        }
+      }
+      console.log(this.ids);
+      this.getMoreEvent();
     },
     //相关实体
     getGraph(event) {
@@ -404,6 +482,8 @@ export default {
         if (res.status === 200) {
           this.entityList = res.data.data.entityList;
           this.graph.load({id:this.entityList[0].id})
+          this.total = this.entityList.length - 1;
+          this.setIds();
         }
       })
     },
@@ -591,7 +671,8 @@ export default {
     }
     .leftImgList{
       width: 340px;
-      height: 100%;
+      height: calc(100% - 90px);
+      margin-top: 40px;
       float: left;
       overflow-y: auto;
       &::-webkit-scrollbar-thumb {
@@ -610,6 +691,7 @@ export default {
         width: 340px;
         height: 100%;
         float: left;
+        margin-top: 0;
         li{
           width: 100%;
           height: 146px;
@@ -625,8 +707,12 @@ export default {
     }
     .detailCenter{
       width: calc(100% - 340px - 370px - 40px);
+      padding: 0 20px;
+      margin: 0 20px;
       float: left;
       height: 100%;
+      border-left: 1px solid #006965;
+      border-right: 1px solid #006965;
       .detailCenterNav{
         height: 38px;
         li{
@@ -750,11 +836,11 @@ export default {
                 line-height: 22px;
               }
               .overflowMorePoint{
-                overflow:hidden; 
-                text-overflow:ellipsis;  
+                overflow:hidden;
+                text-overflow:ellipsis;
                 // width:200px; //指定宽度
-                display:-webkit-box;  
-                -webkit-box-orient:vertical;  
+                display:-webkit-box;
+                -webkit-box-orient:vertical;
                 -webkit-line-clamp:8; //指定显示多少行
               }
               .bottom{
@@ -872,7 +958,7 @@ export default {
       }
       .imgSearch{
         height: calc(100% - 250px);
-        max-height: 500px;
+        // max-height: 500px;
         border: 1px solid #00FFF6;
         background: rgba(3,34,50,0.95);
         .imgSearchPd{
