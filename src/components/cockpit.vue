@@ -1,7 +1,17 @@
 <template>
   <div class="cockpit-warapper">
+    <div class="selectMap">
+        <el-select v-model="mapName" filterable placeholder="请选择图谱名称">
+          <el-option
+            v-for="item in mapArr"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
     <div ref="map" class="XSDFXPage">
-      <gisMap @showCard="showCard" :mapZoom="mapZoom" v-if="mapContent.sign.length>0"
+      <gisMap @showCard="showCard" :mapZoom="mapZoom" v-if="mapContent.sign.length>0 && showMap"
               :mapContent="mapContent"></gisMap>
     </div>
     <!--  图谱放大弹框  -->
@@ -113,7 +123,7 @@
                       <span class="tp">地点: </span><span>{{ currentDetailCont['gis地址'] || '无' }}</span>
                     </div>
                     <p>
-                      <span class="tp">简介: </span> <span>{{ currentDetailCont['简介'] || '无' }}</span>
+                      <span class="tp">简介: </span> <span>{{ currentDetailCont['译文'] || '无' }}</span>
                     </p>
                     <p>
                       <span class="tp">起因: </span> <span>{{ currentDetailCont['事件起因'] || '无' }}</span>
@@ -176,7 +186,7 @@
       <div class="t-pop-cont">
         <div class="scroll-pop">
           <ul>
-            <li v-for="(item, indx) in curTimeData.name" :key="indx">
+            <li v-for="(item, indx) in curTimeData.name" :key="indx" @click="handleClickDetali({id:curTimeData.ids[indx]})">
               <span>{{ indx + 1 }}. {{ item }}</span>
             </li>
           </ul>
@@ -243,6 +253,18 @@ export default {
       timePop: false,
       curTimeData: '',
       window: window,
+      showMap: false,
+      mapName: 'arcgis/{z}/{y}/{x}.png',
+      mapArr: [
+        {
+          label:'arcgis',
+          value:'arcgis/{z}/{y}/{x}.png'
+        },
+        {
+          label:'google',
+          value:'google/{z}/{x}/{-y}.png'
+        },
+      ],
       mapContent: {
         sign: [],
         name: [],
@@ -408,7 +430,8 @@ export default {
     }
   },
   mounted() {
-
+    window.localStorage.mapName = window.localStorage.mapName?window.localStorage.mapName:'arcgis/{z}/{y}/{x}.png';
+    this.showMap = true;
     if (this.$route.params) {
       this.isbackHome = this.$route.params.isbackHome
     }
@@ -427,6 +450,19 @@ export default {
   },
   created() {
 
+  },
+  watch: {
+    mapName: {
+      handler(newVal, oldVal){
+        console.log(newVal);
+        this.showMap = false;
+        window.localStorage.mapName = newVal;
+        setTimeout(() => {
+          this.showMap = true;
+        });
+      },
+      deep: true
+    }
   },
   methods: {
     getScroll(event){
@@ -627,7 +663,7 @@ export default {
     },
     transCard(data) {
       console.log(data, 'data')
-      let obj = ['时间', 'gis地址', '简介', '事件起因', '事件经过', '事件结果、影响、损失等']
+      let obj = ['时间', 'gis地址', '简介', '事件起因', '事件经过', '事件结果、影响、损失等','译文']
       let cont = {}
       for (let j = 0; j < data.length; j++) {
         for (let i = 0; i < obj.length; i++) {
@@ -844,6 +880,7 @@ export default {
         let move = index * 220 - 521 - 180;
         $('.cockpit-time-axis-cont').scrollLeft(move);
       }
+      console.log(this.curTimeData)
     },
     handleClickArrow(step) {
       const length = this.images.length - 3;
@@ -911,6 +948,7 @@ export default {
               item.sourceAsMap.activate = index == 0 ? true : false
               item.sourceAsMap.index_ = index
             })
+            console.log(_this.searchData,'searchData')
             _this.getIds(_this.searchData)
           }
         }
@@ -923,6 +961,7 @@ export default {
         return item
       })
       this.timeLine(ids, true)
+      this.handleClickList(data[0].sourceAsMap);
     },
     allLatLongTrans(data) {
       console.log(data, '显示全部')
@@ -1074,11 +1113,21 @@ export default {
   background: rgba(0,0,0,0);
 }
 
+.selectMap{
+      position: fixed;
+      top: 12px;
+      left: 70px;
+      z-index: 1;
+}
+
 .scroll-pop {
   max-height: 150px;
   overflow-y: auto;
   overflow-x: hidden;
   @include scroll($bg: rgba(0, 130, 255, 0.2), $thumb: #0082ff, $btn: #999, $size: 8px);
+  li{
+    cursor: pointer;
+  }
 }
 
 .scroll-content {

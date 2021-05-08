@@ -9,7 +9,17 @@
       <div class="search">
           <input type="text" v-model="key" placeholder="请输入搜索内容">
           <div class="right" @click="search">搜索</div>
-          <div class="outRight">SpqrQl检索</div>
+          <div class="outRight" @click="handleClickSpqrQl()">SparQl检索</div>
+      </div>
+      <div class="selectKgName">
+        <el-select v-model="kgName" filterable placeholder="请选择图谱名称">
+          <el-option
+            v-for="item in kgNameArr"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
       </div>
       <div class="contentList">
         <ul class="listBg">
@@ -66,17 +76,46 @@ export default {
       indx1: -1,
       listData:[],
       key: '',
-      contentListData:[]
+      contentListData:[],
+      kgName: 'kgms_default_user_graph_178c4ad60df',
+      kgNameArr: [
+        {
+          label:'驾驶舱应用',
+          value:'kgms_default_user_graph_176e0853be8'
+        },
+        {
+          label:'驾驶舱应用20210412',
+          value:'kgms_default_user_graph_178c4a3c1c5'
+        },
+        {
+          label:'驾驶舱应用new',
+          value:'kgms_default_user_graph_178c4ad60df'
+        },
+      ],
     };
   },
   created() {
   },
+  watch: {
+    kgName: {
+      handler(newVal, oldVal){
+        console.log(newVal);
+        window.kgName = newVal;
+        window.localStorage.kgName = newVal;
+        this.getconceptList();
+      },
+      deep: true
+    }
+  },
   mounted() {
     console.log(window,this.window);
+    this.kgName = window.localStorage.kgName?window.localStorage.kgName:'';
+    this.listData.push(window.settingData.listData[0][2])
     this.listData.push(window.settingData.listData[0][0])
     this.listData.push(...window.settingData.listData[1])
     console.log(this.listData);
-    this.getconcept();
+    this.getconceptList();
+    // this.getKgNameArr()
     // console.log(window,'window')
   },
   methods: {
@@ -100,6 +139,9 @@ export default {
 
 
     },
+    handleClickSpqrQl(){
+      window.open(window.URL_MAP.YYJS)
+    },
     handleClickKfpt() {
       window.open(window.URL_MAP.KFPT)
     },
@@ -121,6 +163,48 @@ export default {
             }
             this.getEntityNum(res.data.data[i],i)
           }
+        }
+      })
+    },
+    getconceptList(){
+      this.$http({
+        method: 'post',
+        url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/graph/stat/entity/count/group/by/concept`,
+        headers: {
+          APK: '445a793dd0314abd875b7980d7ffbbd6',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data:  qs.stringify({p:'api',kgName:this.window.kgName})
+      }).then((res) => {
+        console.log(res.data);
+        if (res.data.data) {
+          console.log(res.data);
+          this.contentListData = [];
+          for(let i in res.data.data.series[0].data){
+            if(i == 5){
+              break;
+            }
+            this.contentListData.push({
+              name: res.data.data.series[0].data[i],
+              num: res.data.data.xaxis[0].data[i]
+            })
+          }
+        }
+      })
+    },
+    getKgNameArr(){
+      this.$http({
+        method: 'POST',
+        url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/app/get/kgname?p=api`,
+        headers: {
+          APK: '445a793dd0314abd875b7980d7ffbbd6',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data:  qs.stringify({})
+      }).then((res) => {
+        console.log();
+        if(res.data.data){
+
         }
       })
     },
@@ -187,8 +271,14 @@ export default {
       }
     }
 
+    .selectKgName{
+      position: fixed;
+      top: 40px;
+      left: 40px;
+    }
+
     .search{
-      margin: 20px 30%;
+      margin: 140px 30% 80px 30%;
       width: 40%;
       height: 70px;
       background: #043B50;
@@ -244,16 +334,18 @@ export default {
 
     .constent {
       margin-top: 40px;
-      padding: 0 20%;
-      height: 240px;
+      padding: 0 4%;
+      height: 180px;
       .listBg{
         width: 100%;
         height: 100%;
         li{
           height: 100%;
-          width: 22%;
-          margin-right: 4%;
+          width: 15%;
+          margin-right: calc((100% - 15%*5)/4);
           float: left;
+          border: 1px solid #06F3FF;
+          overflow: hidden;
           &:last-child{
             margin-right: 0;
           }
@@ -262,10 +354,9 @@ export default {
 
 
       .bg-purple {
-        height: 240px;
+        height: 180px;
         cursor: pointer;
         position: relative;
-        box-shadow: 0 0 5px #3db8ff;
         overflow: hidden;
 
         .mantle {
@@ -274,6 +365,7 @@ export default {
           font-size: 26px;
           font-weight: 800;
           color: rgba(255, 255, 255, 0.7);
+          box-shadow: 0 0 20px #06F3FF inset;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -317,7 +409,7 @@ export default {
       }
 
       .grid-content {
-        border-radius: 4px;
+        // border-radius: 4px;
         min-height: 36px;
       }
 

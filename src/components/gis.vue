@@ -124,7 +124,8 @@ export default {
         new Tile({
           source: new XYZ({
             // url: 'http://192.168.5.179:8089/arcgis/{z}/{y}/{x}.png'
-            url: `${window.configure.baseUrl}/arcgis/{z}/{y}/{x}.png`
+            // url: `${window.configure.baseUrl}/arcgis/{z}/{y}/{x}.png`,
+            url: `${window.configure.baseUrl}/${window.localStorage.mapName}`,
           }),
         }),
         this.nodeLayer,
