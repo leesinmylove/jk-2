@@ -40,7 +40,7 @@
         </el-carousel>
       </div>
     </div>
-    <div class="home-back" @click="handleClickIsback" v-if="isbackHome"></div>
+    <div class="home-back" @click="handleClickIsback" v-if="isbackHome?true:true"></div>
     <div class="cockpit-cont">
       <div class="detail-title">
 <!--        <img class="detail-title-bg" src="../static/c-topbj.png"/>-->
@@ -84,8 +84,8 @@
                   <div class="li-cont" :class="{'other':!item.sourceAsMap.activate}">{{ item.sourceAsMap.desc }}</div>
                   <div class="li-time">
                     <P>
-                      <span>{{ item.sourceAsMap.concept_name }}</span>
-                      <span>{{ item.sourceAsMap.time }}</span>
+                      <span class="liOne" v-if="item.sourceAsMap.concept_name">{{ item.sourceAsMap.concept_name }}</span>
+                      <span class="liTwo">{{ item.sourceAsMap.time }}</span>
                     </P>
                     <span @click.stop="handleClickDetali(item.sourceAsMap)" class="detail-text">查看详情</span>
                   </div>
@@ -257,11 +257,11 @@ export default {
       mapName: 'arcgis/{z}/{y}/{x}.png',
       mapArr: [
         {
-          label:'arcgis',
+          label:'大屏版',
           value:'arcgis/{z}/{y}/{x}.png'
         },
         {
-          label:'google',
+          label:'桌面版',
           value:'google/{z}/{x}/{-y}.png'
         },
       ],
@@ -292,7 +292,8 @@ export default {
         loaderSettings: {
           ajaxSettings: {
             queryData: {
-              pageSize: 5,
+              isRelationMerge: true,
+              pageSize: 20,
               distance: 1,
               hyponymyDistance: 0
             },
@@ -353,6 +354,7 @@ export default {
         loaderSettings: {
           ajaxSettings: {
             queryData: {
+              isRelationMerge: true,
               pageSize: 20,
               distance: 1,
               hyponymyDistance: 0
@@ -436,7 +438,7 @@ export default {
       this.isbackHome = this.$route.params.isbackHome
     }
     this.graph = new PdSDKDcGraph(this.settings)
-    this.graph.load({id: 9661})
+    // this.graph.load({id: 9661})
     setTimeout((item) => {
       this.$refs.atlasImg.style = "opacity: 1"
     }, 500)
@@ -589,8 +591,9 @@ export default {
       this.timeLine([item.id])
       this.mapZoom = window.configure.clickZoom
       this.getWisdomCard(item.id)
-      this.getGraph(item.id)
       this.graph.load({id: item.id})
+      this.curGraphId = item.id;
+      this.getGraph(item.id)
     },
     // 实体切换图谱
     handleEntity(id) {
@@ -663,7 +666,7 @@ export default {
     },
     transCard(data) {
       console.log(data, 'data')
-      let obj = ['时间', 'gis地址', '简介', '事件起因', '事件经过', '事件结果、影响、损失等','译文']
+      let obj = ['时间', 'gis地址', '简介', '事件起因', '事件经过', '事件结果、影响、损失等','译文','原文']
       let cont = {}
       for (let j = 0; j < data.length; j++) {
         for (let i = 0; i < obj.length; i++) {
@@ -739,7 +742,10 @@ export default {
           'Content-Type': 'application/x-www-form-urlencoded',
           APK: '445a793dd0314abd875b7980d7ffbbd6'
         },
-        data: qs.stringify({'id': id})
+        data: qs.stringify({
+          'id': id,
+
+        })
       }).then((res) => {
         if (res.status === 200) {
           this.entityList = res.data.data.entityList
@@ -961,6 +967,7 @@ export default {
         return item
       })
       this.timeLine(ids, true)
+      console.log(data,'asdaaaaaaaaaa');
       this.handleClickList(data[0].sourceAsMap);
     },
     allLatLongTrans(data) {
@@ -1115,8 +1122,8 @@ export default {
 
 .selectMap{
       position: fixed;
-      top: 12px;
-      left: 70px;
+      top: 31px;
+      left: 170px;
       z-index: 1;
 }
 
@@ -1404,7 +1411,7 @@ export default {
                 justify-content: space-between;
 
                 p {
-                  span:nth-child(1) {
+                  .liOne {
                     padding: 3px 6px;
                     background: rgba(6, 243, 255, 0);
                     border: 1px solid #06F3FF;
@@ -1412,7 +1419,7 @@ export default {
 
                   }
 
-                  span:nth-child(2) {
+                  .liTwo {
                     font-size: 18px;
                     font-weight: 400;
                     color: #FFFFFF;
@@ -1590,6 +1597,7 @@ export default {
           border-left: 1px solid #3db8ff;
           padding: 13px 0 0 20px;
           position: relative;
+          width: 330px;
 
           h3 {
             height: 15px;
@@ -1805,6 +1813,7 @@ export default {
       position: absolute;
       top: -35px;
       display: flex;
+      // background: rgba(1,24,62,.7);
 
       .time-text {
         display: flex;
@@ -1885,15 +1894,15 @@ export default {
   .cockpit-time-axis-cont {
     width: 100%;
     height: 195px;
-    padding-top: 48px;
+    // padding-top: 48px;
     box-shadow: 0px 0px 10px #3db8ff;
-    background: #01183E;
+    background: rgba(1,24,62,.7);
 
     .positon-time-line {
       position: relative;
       height: 45px;
       width: 100%;
-      top: 0;
+      top: 44px;
 
       .time-cont-active {
       }
@@ -1901,6 +1910,8 @@ export default {
       .time-cont {
         position: absolute;
         top: -44px;
+        background: rgba(1,24,62,.7);
+        height: 187px;
         //display: flex;
 
         .time-text {
@@ -2000,7 +2011,7 @@ export default {
             color: #f8f8f8;
             text-overflow: ellipsis;
             overflow: hidden;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             display: -webkit-box;
           }

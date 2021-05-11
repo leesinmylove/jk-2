@@ -40,8 +40,8 @@
             <div class="grid-content bg-purple">
               <div
                 :class="{
-                  'movse-show': indx != index,
-                  'movse-hide': 'index' == indx,
+                  'mouse-show': indx != index,
+                  'mouse-hide': 'index' == indx,
                 }"
                 class="mantle"
                 @mouseover="indx = index"
@@ -52,8 +52,12 @@
               </div>
               <img
                 :class="{ 'act-img': indx == index, 'img': index != indx }"
-                :src="item.image"
+                :src="item.url"
               />
+              <!-- <div
+                :class="{ 'act-img': indx == index, 'img': index != indx }"
+                :style="{'banckground':item.image}"
+              ></div> -->
             </div>
           </li>
         </ul>
@@ -66,6 +70,11 @@
 </template>
 <script>
 import qs from 'qs'
+import JSC from '../static/JSC.png'
+import LJCZ from '../static/LJCZ.png'
+import TSS from '../static/TSS.png'
+import FLDH from '../static/FLDH.png'
+import ZNWD from '../static/ZNWD.png'
 
 export default {
   filters: {},
@@ -78,20 +87,7 @@ export default {
       key: '',
       contentListData:[],
       kgName: 'kgms_default_user_graph_178c4ad60df',
-      kgNameArr: [
-        {
-          label:'驾驶舱应用',
-          value:'kgms_default_user_graph_176e0853be8'
-        },
-        {
-          label:'驾驶舱应用20210412',
-          value:'kgms_default_user_graph_178c4a3c1c5'
-        },
-        {
-          label:'驾驶舱应用new',
-          value:'kgms_default_user_graph_178c4ad60df'
-        },
-      ],
+      kgNameArr: [],
     };
   },
   created() {
@@ -109,17 +105,28 @@ export default {
   },
   mounted() {
     console.log(window,this.window);
-    this.kgName = window.localStorage.kgName?window.localStorage.kgName:'';
+    this.kgName = window.localStorage.kgName?window.localStorage.kgName:this.window.kgName;
+    this.window.kgName = this.kgName;
+    window.localStorage.kgName = this.kgName;
+    this.kgNameArr = window.kgNameArr;
+
     this.listData.push(window.settingData.listData[0][2])
     this.listData.push(window.settingData.listData[0][0])
     this.listData.push(...window.settingData.listData[1])
-    console.log(this.listData);
+    const urlArr = [LJCZ,JSC,TSS,FLDH,ZNWD];
+    this.listData.forEach( (item,i) => {
+      item.url = urlArr[i]
+    })
+    console.log(this.listData,this.kgNameArr);
     this.getconceptList();
     // this.getKgNameArr()
     // console.log(window,'window')
   },
   methods: {
     search(){
+      if(!this.key){
+        return;
+      }
       this.$router.push({name: 'search', params: {key: this.key}})
     },
     handleMouse(index) {
@@ -131,11 +138,19 @@ export default {
     //   console.log(2);
     // },
     handleClick(item) {
+      if(item.title == '路径查找'){
+        this.$router.push({name: 'iframe', params: {curPageUrl: `${window.configure.baseUrl}/spa/container/${window.localStorage.kgName}/445a793dd0314abd875b7980d7ffbbd6/path?hideHeader=true`, defaultBackBg: item.defaultBackBg}})
+      }if(item.title == '图探索'){
+        this.$router.push({name: 'iframe', params: {curPageUrl: `${window.configure.baseUrl}/spa/container/${window.localStorage.kgName}/445a793dd0314abd875b7980d7ffbbd6/graph?hideHeader=true`, defaultBackBg: item.defaultBackBg}})
+      }if(item.title == '知识图谱分类导航'){
+        this.$router.push({name: 'iframe', params: {curPageUrl: `${window.configure.baseUrl}/spa/container/${window.localStorage.kgName}/445a793dd0314abd875b7980d7ffbbd6/graph?username=default_user&params=0&hideHeader=true&customSettings=%7B%22loaderSettings%22%3A%7B%22ajaxSettings%22%3A%7B%22formData%22%3A%7B%22hyponymyDistance%22%3A6%7D%7D%7D,%22changeLayout%22%3A%7B%22enable%22%3Afalse,%22settings%22%3A%7B%22layout%22%3A%22leftTree%22%7D%7D,%22page%22%3A%7B%22enable%22%3Afalse%7D,%22prompt%22%3A%7B%22enable%22%3Afalse%7D,%22wordCloud%22%3A%7B%22enable%22%3Afalse%7D,%22find%22%3A%7B%22enable%22%3Afalse%7D,%22history%22%3A%7B%22enable%22%3Afalse%7D,%22advancedPrompt%22%3A%7B%22enable%22%3Afalse%7D,%22attValueRule%22%3A%7B%22enable%22%3Afalse%7D,%22infobox%22%3A%7B%22enable%22%3Afalse%7D,%22filter%22%3A%7B%22enable%22%3Afalse%7D,%22relativeFiles%22%3A%7B%22enable%22%3Afalse%7D,%22businessAlgorithm%22%3A%7B%22enable%22%3Afalse%7D,%22snapshot%22%3A%7B%22enable%22%3Afalse%7D,%22snapshotAsnyc%22%3A%7B%22enable%22%3Afalse%7D,%22toolbar%22%3A%7B%22enable%22%3Afalse%7D,%22visConfigure%22%3A%7B%22enable%22%3Afalse%7D,%22tagView%22%3A%7B%22enable%22%3Afalse%7D%7D`, defaultBackBg: item.defaultBackBg}})
+      }else{
         if (item.isHome) {
           this.$router.push({name: 'cockpit', params: {isbackHome: true}})
         } else{
             this.$router.push({name: 'iframe', params: {curPageUrl: item.href, defaultBackBg: item.defaultBackBg}})
         }
+      }
 
 
     },
@@ -278,7 +293,7 @@ export default {
     }
 
     .search{
-      margin: 140px 30% 80px 30%;
+      margin: 172px 30% 54px 30%;
       width: 40%;
       height: 70px;
       background: #043B50;
@@ -382,11 +397,11 @@ export default {
         }
       }
 
-      .movse-show {
+      .mouse-show {
         opacity: 1;
       }
 
-      .movse-hide {
+      .mouse-hide {
         color: #fff !important;
         background: transparent !important;
       }

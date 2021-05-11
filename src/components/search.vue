@@ -1,5 +1,14 @@
 <template>
   <div id="search">
+    <!--  图谱放大弹框  -->
+    <div class="default-popover" @click="isGraphPopover = false" v-show="isGraphPopover">
+      <div class="pop-content">
+        <img @click="isGraphPopover = false" src="../static/close.png"/>
+        <div ref="bigGraph" class="big-graph">
+        </div>
+      </div>
+    </div>
+
       <div class="returnBtn" v-if="contentType == 'content'" @click="returnList()">
         返回
       </div>
@@ -19,27 +28,13 @@
       </ul>
       <div class="content" v-if="navIndex == 0" :class="{'on':contentType == 'content'}">
         <div class="leftList" v-if="contentType == 'search'">
-          <ul class="leftList">
-            <li v-if="releventEventList.length == 0">暂无数据</li>
-            <li class="overflowPoint" v-for="(item,index) in releventEventList" :key="index" :class="{on:index == eventIndex}"
-                :title="item.name"
-                @click="eventClick(index,item)">
-              {{index+1}}.{{item.name}}
-            </li>
-          </ul>
-        </div>
-        <div class="center" v-if="contentType == 'search'">
-          <div class="centerTop" @click="contentType = 'content'">
-            <h4 class="overflowPoint">{{event.name}}</h4>
-            <span>{{event.desc}}</span>
-          </div>
-          <div class="centerContent">
-              <ul class="enentList">
+          <ul class="enentList">
                 <li v-for="(event,index) in eventList" :key="index" @click="clickEvent(event)">
-                  <img :src="event.url" alt="">
+                  <!-- <img :src="event.url" alt=""> -->
                   <div class="rightContent">
                     <h4 class="overflowPoint">{{event.name}}</h4>
-                    <span class="overflowMorePoint">{{event.desc}}</span>
+                    <!-- <span class="overflowMorePoint">{{event.desc}}</span> -->
+                    <span class="overflowMorePoint" v-html="event.desc"></span>
                     <div class="bottom">
                       <ul class="bottomLeft">
                         <li v-for="(item,indext) in event.other" :key="indext">{{item}}</li>
@@ -50,6 +45,46 @@
                   </div>
                 </li>
               </ul>
+          <!-- <ul class="leftList">
+            <li v-if="releventEventList.length == 0">暂无数据</li>
+            <li class="overflowPoint" v-for="(item,index) in releventEventList" :key="index" :class="{on:index == eventIndex}"
+                :title="item.name"
+                @click="eventClick(index,item)">
+              {{index+1}}.{{item.name}}
+            </li>
+          </ul> -->
+        </div>
+        <div class="center" v-if="contentType == 'search'">
+          <div class="centerTop" @click="contentType = 'content'">
+            <h4 class="overflowPoint">{{event.name}}</h4>
+            <span>{{event.desc}}</span>
+          </div>
+          <div class="centerContent">
+              <!-- <ul class="leftListC">
+            <li v-if="showReleventEventList.length == 0">暂无数据</li>
+            <li class="overflowPoint" v-for="(item,index) in showReleventEventList" :key="index" :class="{on:index == eventIndex}"
+                :title="item.name"
+                @click="eventClick(index,item)">
+              {{index+1}}.{{item.name}}
+            </li> -->
+            <ul class="enentList">
+                <li v-for="(event,index) in showReleventEventList" :key="index" >
+                  <img :src="event.url?event.url:noData" alt="" />
+                  <div class="rightContent">
+                    <h4 class="overflowPoint" @click="clickEvent(event)">{{event.title}}</h4>
+                    <!-- <span class="overflowMorePoint">{{event.desc}}</span> -->
+                    <span class="overflowMorePoint" v-html="event.desc" @click="eventClick(index,event)"></span>
+                    <div class="bottom">
+                      <ul class="bottomLeft" v-if="event.other && event.other.length">
+                        <li v-for="(item,indext) in event.other" :key="indext">{{item}}</li>
+                      </ul>
+                      <div class="position overflowPoint" v-if="event.position" :title="event.position">{{event.position}}</div>
+                      <div class="time">{{event.time.substr(0,10)}}</div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+          <!-- </ul> -->
               <div class="pageBottom">
                 <el-pagination
                   @current-change="handleSizeChange"
@@ -79,13 +114,14 @@
           <div class="detailContent">
             <h4 class="overflowPoint">{{event.name}}</h4>
             <div class="timePos">
-              <span v-if="event.date">时间：{{event.date.substr(0,10)}}</span>
-              <span v-if="event.position">地点：{{event.position}}</span>
+              <span>时间：{{event.date ? event.date.substr(0,10) : '未知'}}</span>
+              <span>地点：{{event.position?event.position:'未知'}}</span>
             </div>
             <div class="contenStyle">
               <div class="title" v-if="detailNavIndex==0">简介：</div>
-              <span v-if="detailNavIndex==0">{{event.desc}}</span>
-              <span v-if="detailNavIndex==1">{{event.originalText?event.originalText:event.desc}}</span>
+              <!-- <span v-if="detailNavIndex==0">{{event.desc}}</span> -->
+              <span v-if="detailNavIndex==0" v-html="event.desc"></span>
+              <span v-if="detailNavIndex==1" v-html="event.originalText?event.originalText:event.desc"></span>
             </div>
             <div class="contenStyle">
               <div class="title" v-if="detailNavIndex==0 && event.cause">起因：</div>
@@ -113,6 +149,8 @@
             </div>
           </div>
           <div class="imgSearch">
+            <h4 class="title"><span>知识图谱</span><span @click="handleClickEnlarge()"><img
+              src="../static/zoom-icon.png"></span></h4>
             <div class="imgSearchPd"></div>
           </div>
         </div>
@@ -122,6 +160,7 @@
 <script>
 import qs from 'qs'
 import {PdSDKDcGraph} from "@plantdata/sdk/src/sdk/netchart/graph/dcgraph";
+import noData from "../static/noData.png"
 
 export default {
   filters: {},
@@ -135,14 +174,18 @@ export default {
       detailNavList: ['查看详情','查看原文'],
       eventIndex: 0,
       releventEventList:[],
+      showReleventEventList: [],
       eventList: [],
       event: {},
       entityList:[],
       total: 0,
       currentPage: 1,
       entity:'',
+      noData: noData,
       contentType:'search',//search content
       eventRelevantImg: [],
+      curGraphId: '',
+      isGraphPopover: false,
       settings: {
         selector: '.imgSearchPd', // 选择器的名字
         kgName: window.kgName, // 图谱kgName,这里只是举了个例子
@@ -165,7 +208,8 @@ export default {
         loaderSettings: {
           ajaxSettings: {
             queryData: {
-              pageSize: 5,
+              isRelationMerge: true,
+              pageSize: 20,
               distance: 1,
               hyponymyDistance: 0
             },
@@ -207,6 +251,68 @@ export default {
         }
 
       },
+      bigSettings: {
+        selector: '.big-graph', // 选择器的名字
+        kgName: window.kgName, // 图谱kgName,这里只是举了个例子
+        ajaxSettings: {
+          baseUrl: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/`,
+          headers: {
+            APK: '445a793dd0314abd875b7980d7ffbbd6' // 同理
+          }
+        },
+
+        page: {
+          enable: false
+        },
+        contextmenu: {
+          enable: false
+        },
+        loaderSettings: {
+          ajaxSettings: {
+            queryData: {
+              isRelationMerge: true,
+              pageSize: 20,
+              distance: 1,
+              hyponymyDistance: 0
+            },
+          }
+        },
+        filter: {
+          enable: false
+        },
+        prompt: {
+          enable: false
+        },
+        infobox: {
+          enable: false
+        },
+        resetLayout: {
+          enable: false
+        },
+        history: {
+          enable: false
+        },
+        find: {
+          enable: false
+        },
+        wordCloud: {
+          enable: false
+        },
+        changeLayout: {
+          enable: false
+        },
+        visConfigure: {
+          enable: false
+        },
+        toolbar: {
+          enable: false
+        },
+        zoomSlider: {
+          enable: false
+        }
+
+      },
+      bigGraph: ''
     };
   },
   created() {
@@ -222,6 +328,13 @@ export default {
     search(){
       this.getSearch();
     },
+    handleClickEnlarge() {
+      this.settings.loaderSettings.ajaxSettings.queryData.pageSize = 10
+      console.log(this.bigSettings.loaderSettings.ajaxSettings.queryData.pageSize, this.curGraphId, '-------')
+      this.bigGraph = new PdSDKDcGraph(this.bigSettings)
+      this.bigGraph.load({id: this.curGraphId ? this.curGraphId : 9661})
+      this.isGraphPopover = true
+    },
     navClick(index){
       this.navIndex = index;
     },
@@ -233,13 +346,16 @@ export default {
       this.getEventDetail(item);
     },
     handleSizeChange(page){
-      console.log(page)
+      this.currentPage = page;
+      this.setReleventEventList();
     },
     setEntity(item){
       console.log(item);
-      this.key = item.name;
-      this.search();
-      // this.entity = item;
+      // this.key = item.name;
+      // this.search();
+      this.entity = item;
+      this.curGraphId = item.id;
+      this.graph.load({id:item.id})
     },
     clickEvent(event){
       this.event = event;
@@ -280,7 +396,8 @@ export default {
 
       let data = {
         kw: this.key,
-        docTypeList: ["军事图谱"]
+        docTypeList: ["军事图谱"],
+        pageSize: 1000
       }
 
       this.$http({
@@ -296,13 +413,22 @@ export default {
           this.releventEventList = [];
           for(let i in res.data.data.rsData){
             this.releventEventList.push({
-              id: res.data.data.rsData[i].id,
               ...res.data.data.rsData[i].sourceAsMap
             });
           }
+          this.total = res.data.data.rsCount;
+          this.setReleventEventList();
           this.getEventDetail(this.releventEventList[0]);
         }
       })
+    },
+    setReleventEventList(){
+      this.showReleventEventList = [];
+      for(let i in this.releventEventList){
+        if(i>=(this.currentPage-1) * 10 && i<this.currentPage * 10){
+           this.showReleventEventList.push(this.releventEventList[i])
+        }
+      }
     },
     //批量知识卡片
     getMoreEvent(){
@@ -343,8 +469,11 @@ export default {
                   event.desc = res.data.data[j].self.extra[i].v;
                 }
                 if(!event.desc && res.data.data[j].self.extra[i].k == '译文'){
-                  event.desc = res.data.data[j].self.extra[i].v.replace('<br/>','');
-                  console.log(res.data.data[j].self.extra[i].v.replace('<br/>',''));
+                  event.desc = res.data.data[j].self.extra[i].v.replace(/<br\/>/g,'');
+                  event.desc = event.desc.replace(/<br>/g,'');
+                  this.entityList.forEach(item => {
+                    event.desc = event.desc.replace(new RegExp(item.name,'g'),`<heightLight class="heightLight">${item.name}</heightLight>`)
+                  });
                 }
                 if(res.data.data[j].self.extra[i].k == '事件起因'){
                   event.cause = res.data.data[j].self.extra[i].v;
@@ -448,6 +577,7 @@ export default {
           // this.eventList.push(this.event);
           // this.getEntityNum(event);
           this.getGraph(event);
+          this.graph.load({id: event.id})
           this.getRelevantImg(event);
         }
       })
@@ -460,16 +590,18 @@ export default {
            idsList.push(this.entityList[i].id)
         }
       }
-      for(let i in idsList){
-        if(i>=(this.currentPage-1) * 10 && i<=this.currentPage * 10){
-           this.ids.push(idsList[i])
-        }
-      }
+      this.ids = idsList;
+      // for(let i in idsList){
+      //   if(i>=(this.currentPage-1) * 10 && i<=this.currentPage * 10){
+      //      this.ids.push(idsList[i])
+      //   }
+      // }
       console.log(this.ids);
       this.getMoreEvent();
     },
     //相关实体
-    getGraph(event) {
+    getGraph(eventDet) {
+      this.curGraphId = eventDet.id;
       this.$http({
         method: 'post',
         url: `${window.configure.baseUrl}/plantdata-sdk/api/sdk/app/graph?kgName=${this.window.kgName}&p=api`,
@@ -477,12 +609,23 @@ export default {
           'Content-Type': 'application/x-www-form-urlencoded',
           APK: '445a793dd0314abd875b7980d7ffbbd6'
         },
-        data: qs.stringify({'id': event.id})
+        data: qs.stringify({
+          'id': eventDet.id,
+          isRelationMerge: true
+          })
       }).then((res) => {
         if (res.status === 200) {
           this.entityList = res.data.data.entityList;
-          this.graph.load({id:this.entityList[0].id})
-          this.total = this.entityList.length - 1;
+          // this.graph.load({id:this.entityList[0].id})
+          // this.total = this.entityList.length - 1;
+          this.entity = this.entityList[0];
+          this.releventEventList.forEach( event => {
+            event.desc = event.desc.replace(/<br\/>/g,'');
+            event.desc = event.desc.replace(/<br>/g,'');
+            this.entityList.forEach(item => {
+              event.desc = event.desc.replace(new RegExp(item.name,'g'),`<heightLight class="heightLight">${item.name}</heightLight>`)
+            });
+          })
           this.setIds();
         }
       })
@@ -515,6 +658,54 @@ export default {
   height: 100%;
   background: radial-gradient(circle, #084550, #021829);
   padding: 20px;
+  .default-popover {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+
+    .pop-content {
+      width: 100%;
+      height: 100%;
+      position: relative;
+
+      .big-graph {
+        background: rgba(0, 0, 0, 0.7);
+
+        width: 100%;
+        height: 100%;
+        >>> .pd-panel-float{
+          display: none;
+        }
+        >>> .pd-panel-tabs{
+          display: none;
+        }
+        >>> svg{
+            height: 900px;
+          }
+      }
+
+      img {
+        z-index: 2;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        position: absolute;
+        right: 20px;
+        top: 30px;
+      }
+    }
+  }
+  >>> .heightLight{
+      color: #06F3FF;
+      display: contents;
+    }
   .returnBtn{
       text-align: center;
       line-height: 48px;
@@ -601,20 +792,20 @@ export default {
   .topNav{
     border-bottom: 1px solid #06F3FF;
     width: 100%;
-    height: 60px;
+    height: 52px;
     margin-top: 20px;
     li{
       width: 144px;
-      height: 60px;
+      height: 52px;
       background: rgba(6, 243, 255, 0.1);
       border: 1px solid #06F3FF;
       border-bottom: 0;
       border-radius: 8px 8px 0 0;
       margin-right: 20px;
-      line-height: 60px;
+      line-height: 52px;
       text-align: center;
       color: #06F3FF;
-      font-size: 26px;
+      font-size: 22px;
       cursor: pointer;
       float: left;
       &:first-child{
@@ -649,25 +840,110 @@ export default {
         height: 8px;
         background: transparent;
       }
-      .leftList{
-        border: 1px solid #00FFF6;
-        padding: 8px 30px 8px 8px;
-        width: 390px;
-        float: left;
-        background: rgba(3, 34, 50, 0.95);
-        li{
-          height: 62px;
-          font-size: 22px;
-          line-height: 62px;
-          color: #06F3FF;
-          padding-left: 6px;
-          cursor: pointer;
-          &.on{
-            background: rgba(233, 255, 254, .1);
-            font-weight: bold;
+      .enentList{
+          width: 100%;
+          // height: calc(100% - 32px - 16px);
+          // overflow-y: auto;
+          // &::-webkit-scrollbar-thumb {
+          //   background: #006965;
+          //   border-radius: 10px;
+          // }
+          // &::-webkit-scrollbar-corner {
+          //   background: rgba(0,130,255,0.2);
+          // }
+          // &::-webkit-scrollbar {
+          //   width: 8px;
+          //   height: 8px;
+          //   background: transparent;
+          // }
+          //&
+          >li{
+            height: 270px;
+            padding: 10px;
+            cursor: pointer;
+            img{
+              display: block;
+              width: 268px;
+              height: 250px;
+              float: left;
+            }
+            .rightContent{
+              width: 100%;
+              // width: calc(100% - 268px - 20px);
+              float: right;
+              h4{
+                height: 38px;
+                line-height: 38px;
+                color: #06F3FF;
+                font-size: 18px;
+              }
+              span{
+                height: 178px;
+                display: flex;
+                color: #fff;
+                line-height: 22px;
+              }
+              .overflowMorePoint{
+                overflow:hidden;
+                text-overflow:ellipsis;
+                // width:200px; //指定宽度
+                display:-webkit-box;
+                -webkit-box-orient:vertical;
+                -webkit-line-clamp:8; //指定显示多少行
+              }
+              .bottom{
+                height: 32px;
+                line-height: 32px;
+                color: #fff;
+                .bottomLeft{
+                  width: 240px;
+                  float: left;
+                  height: 32px;
+                  li{
+                    height: 32px;
+                    width: 84px;
+                    border: 1px solid #06F3FF;
+                    float: left;
+                    margin-right: 20px;
+                    color: #06F3FF;
+                    line-height: 32px;
+                    text-align: center;
+                  }
+                }
+                .time{
+                  width: 86px;
+                  float: right;
+                  //margin-right: 20px;
+                }
+                .position{
+                  width: calc(100% - 240px - 130px);
+                  float: right;
+                  text-align: right;
+                }
+              }
+            }
+
           }
         }
-      }
+      // .leftList{
+      //   border: 1px solid #00FFF6;
+      //   padding: 8px 30px 8px 8px;
+      //   width: 390px;
+      //   float: left;
+      //   background: rgba(3, 34, 50, 0.95);
+      //   li{
+      //     height: 62px;
+      //     font-size: 22px;
+      //     line-height: 62px;
+      //     color: #06F3FF;
+      //     padding-left: 6px;
+      //     cursor: pointer;
+      //     &.on{
+      //       background: rgba(233, 255, 254, .1);
+      //       font-weight: bold;
+      //     }
+      //   }
+      // }
     }
     .leftImgList{
       width: 340px;
@@ -718,6 +994,7 @@ export default {
         li{
           height: 38px;
           line-height: 38px;
+          font-size: 18px;
         }
       }
       .detailContent{
@@ -737,9 +1014,9 @@ export default {
         }
         h4{
           color: #06F3FF;
-          font-size: 28px;
-          height: 48px;
-          line-height: 48px;
+          font-size: 24px;
+          height: 60px;
+          line-height: 80px;
           text-align: center;
         }
         .timePos{
@@ -776,7 +1053,7 @@ export default {
         cursor: pointer;
         h4{
           color: #06F3FF;
-          font-size: 28px;
+          font-size: 24px;
           line-height: 60px;
         }
         span{
@@ -794,6 +1071,40 @@ export default {
         margin-top: 20px;
         padding-right: 4px;
         background: rgba(3,34,50,0.95);
+        .leftListC{
+        // border: 1px solid #00FFF6;
+        // padding: 8px 30px 8px 8px;
+        // width: 390px;
+        // width: 100%;
+        // float: left;
+        // background: rgba(3, 34, 50, 0.95);
+        height: calc(100% - 32px - 16px);
+          overflow-y: auto;
+          &::-webkit-scrollbar-thumb {
+            background: #006965;
+            border-radius: 10px;
+          }
+          &::-webkit-scrollbar-corner {
+            background: rgba(0,130,255,0.2);
+          }
+          &::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background: transparent;
+          }
+        li{
+          height: 62px;
+          font-size: 22px;
+          line-height: 62px;
+          color: #06F3FF;
+          padding-left: 6px;
+          cursor: pointer;
+          &.on{
+            background: rgba(233, 255, 254, .1);
+            font-weight: bold;
+          }
+        }
+      }
         .enentList{
           width: 100%;
           height: calc(100% - 32px - 16px);
@@ -814,7 +1125,7 @@ export default {
           >li{
             height: 270px;
             padding: 10px;
-            cursor: pointer;
+            // cursor: pointer;
             img{
               display: block;
               width: 268px;
@@ -828,6 +1139,8 @@ export default {
                 height: 38px;
                 line-height: 38px;
                 color: #06F3FF;
+                cursor: pointer;
+                font-size: 18px;
               }
               span{
                 height: 178px;
@@ -842,6 +1155,7 @@ export default {
                 display:-webkit-box;
                 -webkit-box-orient:vertical;
                 -webkit-line-clamp:8; //指定显示多少行
+                cursor: pointer;
               }
               .bottom{
                 height: 32px;
@@ -936,8 +1250,8 @@ export default {
           ul{
 
             li{
-              height: 24px;
-              line-height: 24px;
+              height: 28px;
+              line-height: 28px;
               padding: 0 6px;
               margin: 10px 0;
               float: left;
@@ -961,17 +1275,49 @@ export default {
         // max-height: 500px;
         border: 1px solid #00FFF6;
         background: rgba(3,34,50,0.95);
+        .title {
+          //margin-top: 14px;
+          text-indent: 10px;
+          //margin-bottom: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          color: #06f3ff;
+          font-weight: bold;
+          font-size: 16px;
+          padding: 10px;
+
+          span:nth-child(1) {
+            font-size: 16px;
+            font-weight: bold;
+            color: #06f3ff;
+
+          }
+
+          span:nth-child(2) {
+            cursor: pointer;
+
+            img {
+              width: 14px;
+              height: 14px;
+            }
+          }
+        }
         .imgSearchPd{
           width: 100%;
-          height: 100%;
+          height: calc(100% - 40px);
+          background: none;
           >>> .pd-panel-float-item{
             display: none;
+          }
+          >>> .plantdata-ns.pd-container{
+            background: none;
           }
           >>> .pd-panel-tabs{
             display: none;
           }
           >>> svg{
-            height: 485px;
+            height: 442px;
           }
         }
       }
