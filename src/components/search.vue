@@ -22,8 +22,8 @@
         </div>
       </div>
       <ul class="topNav" v-if="contentType == 'search'">
-        <li v-for="(item,index) in navList" :key="index" :class="{on:index == navIndex}" @click="navClick(index)">
-          {{item}}
+        <li v-for="(item,index) in navList" :key="index" :class="{on:index == navIndex}" @click="navClick(item,index)">
+          {{item[0].v[0]}}
         </li>
       </ul>
       <div class="content" v-if="navIndex == 0" :class="{'on':contentType == 'content'}">
@@ -169,7 +169,31 @@ export default {
       window:window,
       key: this.$route.params.key?this.$route.params.key:'',
       navIndex: 0,
-      navList: ['相关事件'],
+      navList: [[{
+                "d": "0",
+                "k": "concept_name",
+                "v": [
+                    "事件"
+                ]
+            }],[{
+                "d": "0",
+                "k": "concept_name",
+                "v": [
+                    "人物"
+                ]
+            }],[{
+                "d": "0",
+                "k": "concept_name",
+                "v": [
+                    "机构"
+                ]
+            }],[{
+                "d": "0",
+                "k": "concept_name",
+                "v": [
+                    "装备"
+                ]
+            }]],
       detailNavIndex: 0,
       detailNavList: ['查看详情','查看原文'],
       eventIndex: 0,
@@ -186,6 +210,13 @@ export default {
       eventRelevantImg: [],
       curGraphId: '',
       isGraphPopover: false,
+      filters: [{
+                "d": "0",
+                "k": "concept_name",
+                "v": [
+                    "事件"
+                ]
+            }],
       settings: {
         selector: '.imgSearchPd', // 选择器的名字
         kgName: window.kgName, // 图谱kgName,这里只是举了个例子
@@ -335,7 +366,8 @@ export default {
       this.bigGraph.load({id: this.curGraphId ? this.curGraphId : 9661})
       this.isGraphPopover = true
     },
-    navClick(index){
+    navClick(item,index){
+      this.filters = item;
       this.navIndex = index;
     },
     detailNavClick(index){
@@ -396,8 +428,30 @@ export default {
 
       let data = {
         kw: this.key,
-        docTypeList: ["军事图谱"],
-        pageSize: 1000
+        docTypeList: this.window.kgIndex,
+        pageSize: 1000,
+        aggs: [
+              {
+                  "d": "0",
+                  "v": [],
+                  "k": {
+                      "types": "terms",
+                      "columnItem": "nation",
+                      "name": "国家"
+                  }
+              },
+              {
+                  "d": "0",
+                  "v": [],
+                  "k": {
+                      "types": "terms",
+                      "columnItem": "year",
+                      "name": "年份"
+                  }
+              }
+        ],
+        // filters: this.filters,
+
       }
 
       this.$http({

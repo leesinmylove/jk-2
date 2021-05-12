@@ -18,16 +18,25 @@ window.URL_MAP = {
 
 };
 
-window.kgName = 'kgms_default_user_graph_178c4ad60df'
+window.kgName = {
+  kgName: 'kgms_default_user_graph_178c4ad60df',
+  index: ['军事图谱']
+}
 
 window.kgNameArr = [
   {
     label: '驾驶舱应用',
-    value: 'kgms_default_user_graph_176e0853be8'
+    value: {
+      kgName: 'kgms_default_user_graph_176e0853be8',
+      index: ['军事图谱'],
+    }
   },
   {
     label: '驾驶舱应用20210412',
-    value: 'kgms_default_user_graph_178c4ad60df'
+    value: {
+      kgName: 'kgms_default_user_graph_178c4ad60df',
+      index: ['军事图谱']
+    }
   },
 ]
 

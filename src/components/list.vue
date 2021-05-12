@@ -12,10 +12,10 @@
           <div class="outRight" @click="handleClickSpqrQl()">SparQl检索</div>
       </div>
       <div class="selectKgName">
-        <el-select v-model="kgName" filterable placeholder="请选择图谱名称">
+        <el-select v-model="kgNameObj" popper-class="elSelectStyle" placeholder="请选择图谱名称">
           <el-option
             v-for="item in kgNameArr"
-            :key="item.value"
+            :key="item.label"
             :label="item.label"
             :value="item.value">
           </el-option>
@@ -86,18 +86,20 @@ export default {
       listData:[],
       key: '',
       contentListData:[],
-      kgName: 'kgms_default_user_graph_178c4ad60df',
+      kgNameObj: {},
       kgNameArr: [],
     };
   },
   created() {
   },
   watch: {
-    kgName: {
+    kgNameObj: {
       handler(newVal, oldVal){
         console.log(newVal);
-        window.kgName = newVal;
-        window.localStorage.kgName = newVal;
+        window.kgName = newVal.kgName;
+        window.localStorage.kgName = newVal.kgName;
+        window.kgIndex = newVal.kgIndex;
+        window.localStorage.kgIndex = newVal.kgIndex;
         this.getconceptList();
       },
       deep: true
@@ -105,9 +107,10 @@ export default {
   },
   mounted() {
     console.log(window,this.window);
-    this.kgName = window.localStorage.kgName?window.localStorage.kgName:this.window.kgName;
-    this.window.kgName = this.kgName;
-    window.localStorage.kgName = this.kgName;
+    this.kgNameObj = this.window.kgNameObj;
+    this.window.kgName = window.localStorage.kgName?window.localStorage.kgName:this.window.kgNameObj.kgName;
+    window.localStorage.kgIndex = window.localStorage.kgIndex?window.localStorage.kgIndex:this.window.kgNameObj.kgIndex;
+    window.localStorage.kgName = this.window.kgName;
     this.kgNameArr = window.kgNameArr;
 
     this.listData.push(window.settingData.listData[0][2])
@@ -243,7 +246,25 @@ export default {
   },
 };
 </script>
+<style lang="scss">
+  .elSelectStyle{
+    .popper__arrow{
+      display: none;
+    }
+    .el-select-dropdown__list{
+        background: #006965;
+        .el-select-dropdown__item{
+          background: #006965;
+          color: #fff;
+          &:hover{
+            background: #00fff6;
+          }
+        }
+    }
+}
+</style>
 <style scoped lang="scss">
+
 .list-container {
   width: 100%;
   height: 100%;
@@ -290,6 +311,11 @@ export default {
       position: fixed;
       top: 40px;
       left: 40px;
+      color: #fff;
+      >>> .el-input__inner{
+        background: #006965;
+        color: #fff;
+      }
     }
 
     .search{

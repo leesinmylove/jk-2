@@ -170,8 +170,8 @@
             <div class="content-hidden">
               <div class="scroll-content">
                 <ul class="event-list-info">
-                  <li v-for="(item, index) in eventData" :key="index" @click="handleClickEvent(item)">
-                    {{ item.name }}
+                  <li v-for="(item, index) in eventData" :key="index" @click="handleClickEvent(item.sourceAsMap)">
+                    {{ item.sourceAsMap.name }}
                   </li>
                 </ul>
               </div>
@@ -443,7 +443,7 @@ export default {
       this.$refs.atlasImg.style = "opacity: 1"
     }, 500)
     this.getEntity();
-    this.getEvent();
+    // this.getEvent();
     this.getToken();
     this.queryString();
     this.handleClickSearch()
@@ -587,6 +587,7 @@ export default {
         this.searchData.forEach((v, index) => {
           v.sourceAsMap.activate = item.index_ == index ? true : false
         })
+        this.relationEventSearch(item.name);
       }
       this.timeLine([item.id])
       this.mapZoom = window.configure.clickZoom
@@ -659,7 +660,7 @@ export default {
           const pars = res.data.data.pars
           const data = res.data.data.self.extra
           this.curTitle = res.data.data.self.name
-          this.getEvent(pars[0].classId)
+          // this.getEvent(pars[0].classId)
           this.transCard(data)
         }
       })
@@ -957,6 +958,23 @@ export default {
             console.log(_this.searchData,'searchData')
             _this.getIds(_this.searchData)
           }
+        }
+      })
+    },
+    relationEventSearch(kw){
+      this.$http({
+        method: 'post',
+        url: `${window.configure.baseUrl}/api/kgsearch/sdk/simplekw`,
+        data: {
+          kw: kw,
+          docTypeList: ["军事图谱"]
+        }
+      }).then((res) => {
+        if (res.data.errCode === 200) {
+
+            this.eventData = res.data.data.rsData.splice(1);
+
+
         }
       })
     },
